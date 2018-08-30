@@ -1,0 +1,32 @@
+---
+vrfs:
+  - name: 1
+    description: "first VRF"
+    rd: "65000:1"
+    route_import:
+      - "65000:2"
+    route_export:
+      - "65000:1"
+    interfaces:
+      - "Loopback1"
+    wipe_route_import: false
+    wipe_route_export: false
+  - name: 2
+    description: "second VRF"
+    rd: "65000:2"
+    route_import:
+      - "65000:1"
+    route_export:
+      - "65000:2"
+    interfaces:
+      - "Loopback2"
+    wipe_route_import: false
+    wipe_route_export: false
+
+check:
+  present:
+    - "10.1.1.1/32"
+    - "10.2.2.2/32"
+  absent:
+    - "20.30.40.0/24"
+    - "100.64.0.0/10"

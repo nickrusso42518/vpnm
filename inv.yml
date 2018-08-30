@@ -1,0 +1,10 @@
+---
+all:
+  children:
+    routers:
+      children:
+        ios:
+          vars:
+            ansible_network_os: "ios"
+          hosts:
+            csr1:

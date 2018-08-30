@@ -1,0 +1,11 @@
+{% for vrf in vrfs %}
+{% if vrf.wipe_route_export or vrf.wipe_route_import %}
+vrf definition {{ vrf.name }}
+{% if vrf.wipe_route_export %}
+ no route-target export
+{% endif %}
+{% if vrf.wipe_route_import %}
+ no route-target import
+{% endif %}
+{% endif %}
+{% endfor %}

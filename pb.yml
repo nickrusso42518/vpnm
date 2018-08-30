@@ -1,0 +1,77 @@
+---
+- hosts: routers
+  tasks:
+#
+#    - name: "IOS >> Get running config minus usernames"
+#      ios_command:
+#        commands: "show running-config | exclude ^username"
+#      register: RAW_CONFIG
+
+    - name: "SETFACT >> Store running config for quick reference"
+      set_fact:
+        # RUN_CONFIG: "{{ CLI_OUTPUT.stdout_lines[0] | map('trim') | join('\n') }}"
+        # RUN_CONFIG: "{{ RAW_CONFIG.stdout[0] }}"
+        FIB_CMD_LIST: []
+
+    - name: "IOS >> Wipe route targets"
+      ios_config:
+        src: "wipe_rt.j2"
+      notify: "wait"
+
+    - name: "IOS >> Apply VRF config"
+      ios_vrf:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        rd: "{{ item.rd }}"
+        route_import: "{{ item.route_import }}"
+        route_export: "{{ item.route_export }}"
+        interfaces: "{{ item.interfaces }}"
+      with_items: "{{ vrfs }}"
+      loop_control:
+        label: "{{ item.name }}/{{ item.rd }}"
+      notify: "wait"
+
+    - name: "IOS >> Apply BGP VPN config"
+      ios_config:
+        src: "bgp.j2"
+      notify: "wait"
+
+    - name: "SETFACT >> Build FIB command list"
+      set_fact:
+        FIB_CMD_LIST: "{{ FIB_CMD_LIST }} + ['{{ FIB_CMD }}']"
+      vars:
+        FIB_CMD: "show ip cef vrf {{ item.name }} | exclude drop"
+      with_items: "{{ vrfs }}"
+      loop_control:
+        label: "{{ item.name }}/{{ item.rd }}"
+
+    - meta: flush_handlers
+
+    - name: "IOS >> Capture FIB for both VRFs"
+      ios_command:
+        commands: "{{ FIB_CMD_LIST }}"
+      register: VRF_FIB
+
+    - name: "ASSERT >> Ensure present routes are present"
+      assert:
+        that: "item.1 in item.0"
+      with_nested:
+        - "{{ VRF_FIB.stdout }}"
+        - "{{ check.present }}"
+      loop_control:
+        label: "{{ item.1 }}"
+
+    - name: "ASSERT >> Ensure absent routes are absent"
+      assert:
+        that: "item.1 not in item.0"
+      with_nested:
+        - "{{ VRF_FIB.stdout }}"
+        - "{{ check.absent }}"
+      loop_control:
+        label: "{{ item.1 }}"
+
+  handlers:
+    - name: "PAUSE >> Wait for VPN route convergence"
+      listen: "wait"
+      pause:
+           seconds: 15

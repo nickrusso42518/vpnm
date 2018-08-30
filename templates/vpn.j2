@@ -1,0 +1,21 @@
+{% for vrf in vrfs %}
+vrf definition {{ vrf.name }}
+ description {{ vrf.description }}
+ rd {{ vrf.rd }}
+{% for rte in vrf.route_export %}
+ route-target export {{ rte }}
+{% endfor %}
+{% for rti in vrf.route_import %}
+ route-target import {{ rti }}
+{% endfor %}
+ address-family ipv4
+ exit-address-family
+ address-family ipv6
+ exit-address-family
+{% endfor %}
+router bgp 65000
+ no bgp default ipv4-unicast
+{% for vrf in vrfs %}
+ address-family ipv4 vrf {{ vrf.name }}
+  redistribute connected
+{% endfor %}
