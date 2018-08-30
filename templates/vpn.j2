@@ -9,9 +9,7 @@ vrf definition {{ vrf.name }}
  route-target import {{ rti }}
 {% endfor %}
  address-family ipv4
- exit-address-family
  address-family ipv6
- exit-address-family
 {% endfor %}
 router bgp 65000
  no bgp default ipv4-unicast
