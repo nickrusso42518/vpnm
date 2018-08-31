@@ -1,11 +1,7 @@
 ---
-- hosts: routers
+- name: "Manage MPLS L3VPN route-targets"
+  hosts: routers
   tasks:
-
-    - name: "SETFACT >> Store running config for quick reference"
-      set_fact:
-        FIB_CMD_LIST: []
-
     - name: "IOS >> Get running config"
       ios_command:
         commands: "show running-config | section ^vrf_definition"
@@ -25,7 +21,11 @@
       register: CONFIG_OUTPUT
       notify: "wait"
 
-    - name: "SETFACT >> Build FIB command list"
+    - name: "SETFACT >> Initialize empty FIB command list"
+      set_fact:
+        FIB_CMD_LIST: []
+
+    - name: "SETFACT >> Build FIB command list based on intended VRFs"
       set_fact:
         FIB_CMD_LIST: "{{ FIB_CMD_LIST }} + ['{{ FIB_CMD }}']"
       vars:
@@ -34,6 +34,7 @@
       loop_control:
         label: "VRF {{ item.name }}"
 
+    # If there were changes, print them and wait for VPN convergence
     - meta: flush_handlers
 
     - name: "IOS >> Capture FIB for all VRFs"
@@ -58,5 +59,5 @@
     - name: "PAUSE >> Wait for VPN route convergence"
       listen: "wait"
       pause:
-        seconds: 15
+        seconds: "{{ conv_time | int }}"
 ...

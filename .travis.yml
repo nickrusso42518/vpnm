@@ -8,6 +8,10 @@ install:
   - "pip install -r requirements.txt"
 
 # Execute linting and unit tests before running the main playbook.
-# Right now, this is the whole test, but will be improved later.
+before_script:
+  - "echo 'brkrst3310' >> ~/vault_pass_file.txt"
+  - "make lint unit"
+
+# Perform playbook testing with mock CI inputs.
 script:
-  - "./tests/lint.sh"
+  - "make pb"

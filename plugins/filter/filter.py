@@ -74,7 +74,7 @@ class FilterModule(object):
             }
 
             # If the intended VRF exists in the running config
-            run_vrf = run_vrf_dict.get(int_vrf['name'])
+            run_vrf = run_vrf_dict.get(str(int_vrf['name']))
             if run_vrf:
                 int_rti = set(int_vrf['route_import'])
                 int_rte = set(int_vrf['route_export'])

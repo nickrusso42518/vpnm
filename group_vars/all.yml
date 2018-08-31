@@ -1,4 +1,5 @@
 ---
+conv_time: 60
 ci_test: false
 ansible_user: "ansible"
 ansible_ssh_pass: !vault |
