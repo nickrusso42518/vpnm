@@ -1,16 +1,36 @@
 ---
-# Simple wrapper to call the main playbook with 'ci_test' set to true.
-# Because this particular playbook does not require dedicated test
-# playbook due to its simplicity, its easier just to invoke the main
-# one. This is also consistent and allows for future growth rather
-# than using '-e' from the CI build specifications.
-# - import_playbook: "../vpnm_playbook.yml"
-#   vars:
-#     ci_test: true
-#     ansible_connection: "local"
-- hosts: localhost
-  connection: local
-  tasks:
-    - debug:
-        msg: "not implemented yet"
+- import_playbook: "../vpnm_playbook.yml"
+  vars:
+    ansible_connection: "local"
+    CLI_OUTPUT:
+      stdout:
+        - |
+          vrf definition 1
+           description first VRF
+           rd 65000:1
+           route-target export 65000:2
+           route-target export 1:1
+           route-target import 65000:1
+          vrf definition 2
+           description second VRF
+           rd 65000:2
+           route-target export 65000:2
+          vrf definition 3
+           description third VRF
+           rd 65000:3
+           route-target export 65000:1
+           route-target export 1:1
+    VRF_FIB:
+      stdout:
+        - |
+          0.0.0.0/0 stuff
+          10.3.3.0/30 stuff
+          10.4.4.0/24 stuff
+          10.5.5.128/26 stuff
+        - ""
+        - |
+          0.0.0.0/0 stuff
+          10.1.1.0/30 stuff
+          10.2.2.0/30 stuff
+          10.5.5.128/26 stuff
 ...

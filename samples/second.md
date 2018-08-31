@@ -31,6 +31,15 @@ PLAY [Manage MPLS L3VPN route-targets] ****************************************
 TASK [IOS >> Get running config] **********************************************
 ok: [csr1]
 
+TASK [ASSERT >> Ensure CLI_OUTPUT is defined] ********************************
+ok: [csr1] => {
+    "changed": false
+}
+
+MSG:
+
+All assertions passed
+
 TASK [SETFACT >> Get current RT import/export list] ***************************
 ok: [csr1]
 
@@ -48,8 +57,26 @@ ok: [csr1] => (item=VRF 1)
 ok: [csr1] => (item=VRF 2)
 ok: [csr1] => (item=VRF 3)
 
+TASK [ASSERT >> Ensure FIB_CMD_LIST and vrfs are same length] ****************
+ok: [csr1] => {
+    "changed": false
+}
+
+MSG:
+
+All assertions passed
+
 TASK [IOS >> Capture FIB for all VRFs] ****************************************
 ok: [csr1]
+
+TASK [ASSERT >> Ensure VRF_FIB is defined] ***********************************
+ok: [csr1] => {
+    "changed": false
+}
+
+MSG:
+
+All assertions passed
 
 TASK [INCLUDE >> Perform route and ping checks] *******************************
 skipping: [csr1] => (item=VRF 2)

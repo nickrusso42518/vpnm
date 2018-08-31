@@ -12,6 +12,7 @@
     dest: "{{ ping }}"
     vrf: "{{ item.0.name }}"
   with_items: "{{ item.0.check.pings }}"
+  tags: "do_ssh"
   loop_control:
     loop_var: ping
     label: "can VRF {{ item.0.name }} ping {{ ping }}?"

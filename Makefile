@@ -2,10 +2,12 @@
 # Version: GNU Make 3.81
 # Author:  Nicholas Russo (njrusmc@gmail.com)
 # Purpose: Phony targets used for linting (YAML/Python) and running
-#          the script for some quick testing. Unit tests may be
-#          added in the future. See .travis.yml for invocation.
-.PHONY: all
-all:	lint unit pb
+#          the script for some quick testing. The 'test' target runs
+#          the lint, unit testing, and playbook testing in series.
+#          Individual targets can be run as well, typically for CI.
+#          See .travis.yml for the individual target invocations.
+.PHONY: test
+test:	lint unit pb
 
 .PHONY: lint
 lint:
@@ -24,5 +26,5 @@ unit:
 .PHONY: pb
 pb:
 	@echo "Starting  playbook tests"
-	ansible-playbook tests/test_playbook.yml
+	ansible-playbook tests/test_playbook.yml --skip-tags "do_ssh"
 	@echo "Completed playbook tests"

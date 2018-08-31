@@ -1,6 +1,5 @@
 ---
 conv_time: 60
-ci_test: false
 ansible_user: "ansible"
 ansible_ssh_pass: !vault |
           $ANSIBLE_VAULT;1.1;AES256

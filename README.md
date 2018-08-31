@@ -15,9 +15,11 @@ Whenever changes occur, routing and ping reachability is validated.
   * [Supported platforms](#supported-platforms)
   * [Variables](#variables)
   * [Task summary](#task-summary)
+  * [Testing](#testing)
 
 ## Supported platforms
-At present, only Cisco IOS platforms are supported.
+At present, only Cisco IOS platforms are supported. Cisco IOS-XR may
+be added in the future.
 
 Testing was conducted on the following platforms and versions:
   * Cisco CSR1000v, version 16.08.01a, running in AWS
@@ -108,8 +110,9 @@ on the router, even those not being managed by this playbook. Next, the
 parsed RT information from the router is compared against the user-provided
 intended RT configuration. For each user-defined VRF, the playbook determines
 which RTs must be added or deleted. RTs absent from the intended RT
-configuration are automatically and idempotently removed. The playbook also
-ensures that each VRF is defined as a BGP AFI and redistributes any connected
+configuration are automatically and idempotently removed.
+
+The playbook also configures VRFs in BGP and redistributes any connected
 routes. If a user-defined VRF does not exist in the current configuration, it
 is added, along with all defined RTs. If a VRF exists in the current
 configuration but does not exist in the user-defined configuration, it is
@@ -127,3 +130,27 @@ Last, the routing and ping verification runs. These test cases are run
 regardless of whether changes occurred or not.
 
 Please see the outputs in the `samples/` directory to see the playbook output.
+
+## Testing
+This playbook comes with three test phases, executed in sequence:
+1. __Linting__: Perform YAML and Python linting, as well as Python static code
+  analysis first. Immediately fail if linting fails to prevent executing
+  insecure or syntactically incorrect code.
+2. __Unit tests__: Perform regression testing on custom Python filters with mock
+  inputs. Immediately fail if unit tests fail to prevent playbook issues.
+3. __Integration tests__: These tests the entire system minus the actual
+  login to a network device. All actions requiring network device interaction
+  are tagged with `do_ssh` which is skipped when these tests are run. Mock
+  inputs are supplied as variables when the playbook is invoked through the
+  test playbook wrapper.
+
+To simplify testing both for CI and for manual executions, a GNU Makefile
+with phony targets is used. Use the following shortcuts to test the playbook.
+It is recommend to run all tests immediately after cloning to save yourself
+the pain of discovering bugs during development.
+1. `make lint`: Runs the linting process
+2. `make unit`: Runs the unit tests
+3. `make pb`: Runs the playbook tests
+4. `make test`: Runs all tests (linting, unit, and playbook, in that order)
+
+Please see `.travis.yml` for more details on how the tests are executed.

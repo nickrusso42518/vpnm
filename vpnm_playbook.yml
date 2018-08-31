@@ -2,10 +2,19 @@
 - name: "Manage MPLS L3VPN route-targets"
   hosts: routers
   tasks:
+
     - name: "IOS >> Get running config"
       ios_command:
         commands: "show running-config | section ^vrf_definition"
       register: CLI_OUTPUT
+      tags: "do_ssh"
+
+    - name: "ASSERT >> Ensure CLI_OUTPUT is defined"
+      assert:
+        that:
+          - "CLI_OUTPUT is defined"
+          - "CLI_OUTPUT.stdout[0] | length > 0"
+        msg: "Internal error: CLI_OUTPUT not defined"
 
     - name: "SETFACT >> Get current RT import/export list"
       set_fact:
@@ -19,6 +28,7 @@
       ios_config:
         src: "vpn.j2"
       register: CONFIG_OUTPUT
+      tags: "do_ssh"
       notify: "wait"
 
     - name: "SETFACT >> Initialize empty FIB command list"
@@ -34,6 +44,14 @@
       loop_control:
         label: "VRF {{ item.name }}"
 
+    - name: "ASSERT >> Ensure FIB_CMD_LIST and vrfs are same length"
+      assert:
+        that: "FIB == VRF"
+        msg: "Internal error: mistmatched lengths {{ FIB }}:{{ VRF }}"
+      vars:
+        FIB: "{{ FIB_CMD_LIST | length }}"
+        VRF: "{{ vrfs | length }}"
+
     # If there were changes, print them and wait for VPN convergence
     - meta: flush_handlers
 
@@ -41,6 +59,14 @@
       ios_command:
         commands: "{{ FIB_CMD_LIST }}"
       register: VRF_FIB
+      tags: "do_ssh"
+
+    - name: "ASSERT >> Ensure VRF_FIB is defined"
+      assert:
+        that:
+          - "VRF_FIB is defined"
+          - "VRF_FIB | length > 0"
+        msg: "Internal error: VRF_FIB not defined"
 
     - name: "INCLUDE >> Perform route and ping checks"
       include_tasks: "tasks/route_ping.yml"
