@@ -47,6 +47,7 @@
       with_together:
         - "{{ vrfs }}"
         - "{{ VRF_FIB.stdout }}"
+      when: "item.0.check is defined and item.0.check"
       loop_control:
         label: "VRF {{ item.0.name }}"
 

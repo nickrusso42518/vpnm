@@ -22,13 +22,7 @@ vrfs:
       - "65000:1"
     route_export:
       - "65000:2"
-    check:
-      routes:
-        - "10.3.3.0/30"
-        - "10.4.4.0/24"
-      pings:
-        - "10.3.3.1"
-        - "10.4.4.44"
+    check: false
 
   - name: '3'
     description: "third VRF"

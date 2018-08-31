@@ -1,5 +1,4 @@
 ansible==2.6.2
 pylint
 yamllint
-pymarkdownlint
 bandit
