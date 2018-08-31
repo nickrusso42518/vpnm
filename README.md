@@ -1,3 +1,7 @@
+[![Build Status](
+https://travis-ci.org/nickrusso42518/vpnm.svg?branch=master)](
+https://travis-ci.org/nickrusso42518/vpnm)
+
 # MPLS L3VPN Manager (vpnm)
 This playbook is true infrastructure-as-code. Users declare a list of VRFs
 under Ansible's control, then specify which route-targets should exist.
