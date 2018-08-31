@@ -1,0 +1,18 @@
+---
+- name: "ASSERT >> Ensure route checks succeed"
+  assert:
+    that: "route in item.1"
+  with_items: "{{ item.0.check.routes }}"
+  loop_control:
+    loop_var: route
+    label: "does VRF {{ item.0.name }} have route {{ route }}?"
+
+- name: "IOS >> Ensure ping checks succeed"
+  ios_ping:
+    dest: "{{ ping }}"
+    vrf: "{{ item.0.name }}"
+  with_items: "{{ item.0.check.pings }}"
+  loop_control:
+    loop_var: ping
+    label: "can VRF {{ item.0.name }} ping {{ ping }}?"
+...

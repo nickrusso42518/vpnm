@@ -1,0 +1,13 @@
+---
+language: python
+python:
+  - "2.7"
+
+# Install python packages for ansible and linters.
+install:
+  - "pip install -r requirements.txt"
+
+# Execute linting and unit tests before running the main playbook.
+# Right now, this is the whole test, but will be improved later.
+script:
+  - "./tests/lint.sh"

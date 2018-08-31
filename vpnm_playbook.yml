@@ -1,0 +1,62 @@
+---
+- hosts: routers
+  tasks:
+
+    - name: "SETFACT >> Store running config for quick reference"
+      set_fact:
+        FIB_CMD_LIST: []
+
+    - name: "IOS >> Get running config"
+      ios_command:
+        commands: "show running-config | section ^vrf_definition"
+      register: CLI_OUTPUT
+
+    - name: "SETFACT >> Get current RT import/export list"
+      set_fact:
+        CUR_VRF: "{{ CLI_OUTPUT.stdout[0] | ios_vrf_rt }}"
+
+    - name: "SETFACT >> Determine RT import/export differences"
+      set_fact:
+        RT_DIFF: "{{ vrfs | rt_diff(CUR_VRF) }}"
+
+    - name: "IOS >> Apply VPN config"
+      ios_config:
+        src: "vpn.j2"
+      register: CONFIG_OUTPUT
+      notify: "wait"
+
+    - name: "SETFACT >> Build FIB command list"
+      set_fact:
+        FIB_CMD_LIST: "{{ FIB_CMD_LIST }} + ['{{ FIB_CMD }}']"
+      vars:
+        FIB_CMD: "show ip cef vrf {{ item.name }} | exclude drop"
+      with_items: "{{ vrfs }}"
+      loop_control:
+        label: "VRF {{ item.name }}"
+
+    - meta: flush_handlers
+
+    - name: "IOS >> Capture FIB for all VRFs"
+      ios_command:
+        commands: "{{ FIB_CMD_LIST }}"
+      register: VRF_FIB
+
+    - name: "INCLUDE >> Perform route and ping checks"
+      include_tasks: "tasks/route_ping.yml"
+      with_together:
+        - "{{ vrfs }}"
+        - "{{ VRF_FIB.stdout }}"
+      loop_control:
+        label: "VRF {{ item.0.name }}"
+
+  handlers:
+    - name: "DEBUG >> Print changes"
+      listen: "wait"
+      debug:
+        msg: "{{ CONFIG_OUTPUT.commands | to_nice_json }}"
+
+    - name: "PAUSE >> Wait for VPN route convergence"
+      listen: "wait"
+      pause:
+        seconds: 15
+...

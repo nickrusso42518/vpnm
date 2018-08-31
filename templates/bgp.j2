@@ -1,6 +1,0 @@
-router bgp 65000
- no bgp default ipv4-unicast
-{% for vrf in vrfs %}
- address-family ipv4 vrf {{ vrf.name }}
-  redistribute connected
-{% endfor %}
