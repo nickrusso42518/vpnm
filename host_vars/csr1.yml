@@ -1,12 +1,12 @@
 ---
 vrfs:
-  - name: '1'
+  - name: "1"
     description: "first VRF"
     rd: "65000:1"
     route_import:
-      - "65000:1"
+      - "65000:1"  # optional comment here
     route_export:
-      - "65000:2"
+      - "65000:2"  # optional comment here
     check:
       routes:
         - "10.3.3.0/30"
@@ -15,22 +15,22 @@ vrfs:
         - "10.3.3.1"
         - "10.4.4.44"
 
-  - name: '2'
+  - name: "2"
     description: "second VRF"
     rd: "65000:2"
     route_import:
-      - "65000:1"
+      - "65000:1"  # optional comment here
     route_export:
-      - "65000:2"
+      - "65000:2"  # optional comment here
     check: false
 
-  - name: '3'
+  - name: "3"
     description: "third VRF"
     rd: "65000:3"
     route_import:
-      - "65000:2"
+      - "65000:2"  # optional comment here
     route_export:
-      - "65000:1"
+      - "65000:1"  # optional comment here
     check:
       routes:
         - "10.1.1.0/30"

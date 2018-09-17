@@ -26,5 +26,5 @@ unit:
 .PHONY: pb
 pb:
 	@echo "Starting  playbook tests"
-	ansible-playbook tests/test_playbook.yml --skip-tags "do_ssh"
+	ansible-playbook tests/test_playbook.yml --skip-tags "do_ssh" -l csr1
 	@echo "Completed playbook tests"

@@ -33,4 +33,41 @@
           10.1.1.0/30 stuff
           10.2.2.0/30 stuff
           10.5.5.128/26 stuff
+    vrfs:
+      - name: "1"
+        description: "first VRF"
+        rd: "65000:1"
+        route_import:
+          - "65000:1"
+        route_export:
+          - "65000:2"
+        check:
+          routes:
+            - "10.3.3.0/30"
+            - "10.4.4.0/24"
+          pings:
+            - "10.3.3.1"
+            - "10.4.4.44"
+      - name: "2"
+        description: "second VRF"
+        rd: "65000:2"
+        route_import:
+          - "65000:1"
+        route_export:
+          - "65000:2"
+        check: false
+      - name: "3"
+        description: "third VRF"
+        rd: "65000:3"
+        route_import:
+          - "65000:2"
+        route_export:
+          - "65000:1"
+        check:
+          routes:
+            - "10.1.1.0/30"
+            - "10.2.2.0/30"
+          pings:
+            - "10.1.1.1"
+            - "10.2.2.1"
 ...

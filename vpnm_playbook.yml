@@ -27,6 +27,7 @@
     - name: "IOS >> Apply VPN config"
       ios_config:
         src: "vpn.j2"
+        save_when: changed
       register: CONFIG_OUTPUT
       tags: "do_ssh"
       notify: "wait"
