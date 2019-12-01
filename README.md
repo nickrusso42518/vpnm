@@ -23,6 +23,8 @@ be added in the future.
 
 Testing was conducted on the following platforms and versions:
   * Cisco CSR1000v, version 16.08.01a, running in AWS
+  * Cisco CSR1000v, version 16.09.02, running in AWS
+  * Cisco CSR1000v, version 16.12.01a, running in AWS
 
 ```
 $ cat /etc/redhat-release
@@ -33,14 +35,15 @@ Linux ip-10-125-0-100.ec2.internal 3.10.0-693.el7.x86_64 #1 SMP
   Thu Jul 6 19:56:57 EDT 2017 x86_64 x86_64 x86_64 GNU/Linux
 
 $ ansible --version
-ansible 2.6.2
-  config file = /home/ec2-user/natm/ansible.cfg
-  configured module search path = [u'/home/ec2-user/.ansible/plugins/modules',
-    u'/usr/share/ansible/plugins/modules']
-  ansible python module location = /usr/lib/python2.7/site-packages/ansible
-  executable location = /usr/bin/ansible
-  python version = 2.7.5 (default, May  3 2017, 07:55:04)
-    [GCC 4.8.5 20150623 (Red Hat 4.8.5-14)]
+ansible 2.8.7
+  config file = /home/ec2-user/racc/ansible.cfg
+  configured module search path = ['/home/ec2-user/.ansible/plugins/modules',
+    '/usr/share/ansible/plugins/modules']
+  ansible python module location =
+    /home/ec2-user/environments/racc287/lib/python3.7/site-packages/ansible
+  executable location = /home/ec2-user/environments/racc287/bin/ansible
+  python version = 3.7.3 (default, Aug 27 2019, 16:56:53)
+    [GCC 4.8.5 20150623 (Red Hat 4.8.5-36)]
 ```
 
 ## Variables
@@ -50,7 +53,7 @@ dictionaries has the following format:
 ```
 ---
 vrfs:
-  - name: '1'
+  - name: "VRF1"
     description: "first VRF"
     rd: "65000:1"
     route_import:
@@ -64,7 +67,7 @@ vrfs:
       pings:
         - "10.3.3.1"
         - "10.4.4.44"
-  - name: '2'
+  - name: "VRF2"
     description: "second VRF"
     rd: "65000:2"
     route_import:
@@ -135,10 +138,12 @@ Please see the outputs in the `samples/` directory to see the playbook output.
 This playbook comes with three test phases, executed in sequence:
 1. __Linting__: Perform YAML and Python linting, as well as Python static code
   analysis first. Immediately fail if linting fails to prevent executing
-  insecure or syntactically incorrect code.
-2. __Unit tests__: Perform regression testing on custom Python filters with mock
+  insecure or syntactically incorrect code. Uses the `pylint` package.
+2. __Formatting__: Ensure Python files are formatted in a simple, consistent
+   way using the `black` package.
+3. __Unit tests__: Perform regression testing on custom Python filters with mock
   inputs. Immediately fail if unit tests fail to prevent playbook issues.
-3. __Integration tests__: These tests the entire system minus the actual
+4. __Integration tests__: These tests the entire system minus the actual
   login to a network device. All actions requiring network device interaction
   are tagged with `do_ssh` which is skipped when these tests are run. Mock
   inputs are supplied as variables when the playbook is invoked through the

@@ -2,7 +2,7 @@
 - name: "Store IOS VRF text"
   set_fact:
     text: |-
-      vrf definition 1
+      vrf definition VRF1
        description first VRF
        rd 65000:1
        route-target export 65000:111
@@ -11,7 +11,7 @@
        exit-address-family
        address-family ipv6
        exit-address-family
-      vrf definition 2
+      vrf definition VRF2
        description second VRF
        rd 65000:2
        route-target export 65000:111
@@ -22,7 +22,7 @@
        exit-address-family
        address-family ipv6
        exit-address-family
-      vrf definition 3
+      vrf definition VRF3
        description third VRF
        rd 65000:3
        route-target import 65000:303
@@ -37,30 +37,30 @@
 
 - name: "Print structured data"
   debug:
-    var: data
+    var: "data"
 
 - name: "ASSERT >> Ensure VRF 1 parsing succeeded"
   assert:
     that:
-      - "data['1']['route_export'] | length == 1"
-      - "data['1']['route_export'][0] == '65000:111'"
-      - "data['1']['route_import'] | length == 1"
-      - "data['1']['route_import'][0] == '65000:101'"
+      - "data['VRF1']['route_export'] | length == 1"
+      - "data['VRF1']['route_export'][0] == '65000:111'"
+      - "data['VRF1']['route_import'] | length == 1"
+      - "data['VRF1']['route_import'][0] == '65000:101'"
 
 - name: "ASSERT >> Ensure VRF 2 parsing succeeded"
   assert:
     that:
-      - "data['2']['route_export'] | length == 2"
-      - "data['2']['route_export'][0] == '65000:111'"
-      - "data['2']['route_export'][1] == '65000:222'"
-      - "data['2']['route_import'] | length == 2"
-      - "data['2']['route_import'][0] == '65000:101'"
-      - "data['2']['route_import'][1] == '65000:202'"
+      - "data['VRF2']['route_export'] | length == 2"
+      - "data['VRF2']['route_export'][0] == '65000:111'"
+      - "data['VRF2']['route_export'][1] == '65000:222'"
+      - "data['VRF2']['route_import'] | length == 2"
+      - "data['VRF2']['route_import'][0] == '65000:101'"
+      - "data['VRF2']['route_import'][1] == '65000:202'"
 
 - name: "ASSERT >> Ensure VRF 3 parsing succeeded"
   assert:
     that:
-      - "data['3']['route_export'] | length == 0"
-      - "data['3']['route_import'] | length == 1"
-      - "data['3']['route_import'][0] == '65000:303'"
+      - "data['VRF3']['route_export'] | length == 0"
+      - "data['VRF3']['route_import'] | length == 1"
+      - "data['VRF3']['route_import'][0] == '65000:303'"
 ...

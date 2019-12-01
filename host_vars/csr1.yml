@@ -1,6 +1,6 @@
 ---
 vrfs:
-  - name: "1"
+  - name: "VRF1"
     description: "first VRF"
     rd: "65000:1"
     route_import:
@@ -15,7 +15,7 @@ vrfs:
         - "10.3.3.1"
         - "10.4.4.44"
 
-  - name: "2"
+  - name: "VRF2"
     description: "second VRF"
     rd: "65000:2"
     route_import:
@@ -24,7 +24,7 @@ vrfs:
       - "65000:2"  # optional comment here
     check: false
 
-  - name: "3"
+  - name: "VRF3"
     description: "third VRF"
     rd: "65000:3"
     route_import:
