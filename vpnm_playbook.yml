@@ -1,65 +1,68 @@
 ---
 - name: "Manage MPLS L3VPN route-targets"
-  hosts: routers
+  hosts: "routers"
   tasks:
-
     - name: "IOS >> Get running config"
       ios_command:
         commands: "show running-config | section ^vrf_definition"
-      register: CLI_OUTPUT
+      register: "CLI_OUTPUT"
       tags: "do_ssh"
 
-    - name: "ASSERT >> Ensure CLI_OUTPUT is defined"
-      assert:
-        that:
-          - "CLI_OUTPUT is defined"
-          - "CLI_OUTPUT.stdout[0] | length > 0"
-        msg: "Internal error: CLI_OUTPUT not defined"
+    - block:
+        - name: "ASSERT >> Ensure CLI_OUTPUT is defined"
+          assert:
+            that:
+              - "CLI_OUTPUT is defined"
+              - "CLI_OUTPUT.stdout[0] | length > 0"
+            msg: "Internal error: CLI_OUTPUT not defined"
 
-    - name: "SETFACT >> Get current RT import/export list"
-      set_fact:
-        CUR_VRF: "{{ CLI_OUTPUT.stdout[0] | ios_vrf_rt }}"
+        - name: "SETFACT >> Get current RT import/export list"
+          set_fact:
+            CUR_VRF: "{{ CLI_OUTPUT.stdout[0] | ios_vrf_rt }}"
 
-    - name: "SETFACT >> Determine RT import/export differences"
-      set_fact:
-        RT_DIFF: "{{ vrfs | rt_diff(CUR_VRF) }}"
+        - name: "SETFACT >> Determine RT import/export differences"
+          set_fact:
+            RT_DIFF: "{{ vrfs | rt_diff(CUR_VRF) }}"
+      delegate_to: "localhost"
 
     - name: "IOS >> Apply VPN config"
       ios_config:
         src: "vpn.j2"
-        save_when: changed
-      register: CONFIG_OUTPUT
+        save_when: "changed"
+      register: "CONFIG_OUTPUT"
       tags: "do_ssh"
       notify: "wait"
 
-    - name: "SETFACT >> Initialize empty FIB command list"
-      set_fact:
-        FIB_CMD_LIST: []
+    - block:
+        - name: "SETFACT >> Initialize empty FIB command list"
+          set_fact:
+            FIB_CMD_LIST: []
 
-    - name: "SETFACT >> Build FIB command list based on intended VRFs"
-      set_fact:
-        FIB_CMD_LIST: "{{ FIB_CMD_LIST }} + ['{{ FIB_CMD }}']"
-      vars:
-        FIB_CMD: "show ip cef vrf {{ item.name }} | exclude drop"
-      with_items: "{{ vrfs }}"
-      loop_control:
-        label: "VRF {{ item.name }}"
+        - name: "SETFACT >> Build FIB command list based on intended VRFs"
+          set_fact:
+            FIB_CMD_LIST: "{{ FIB_CMD_LIST }} + ['{{ FIB_CMD }}']"
+          vars:
+            FIB_CMD: "show ip cef vrf {{ item.name }} | exclude drop"
+          with_items: "{{ vrfs }}"
+          loop_control:
+            label: "VRF {{ item.name }}"
 
-    - name: "ASSERT >> Ensure FIB_CMD_LIST and vrfs are same length"
-      assert:
-        that: "FIB == VRF"
-        msg: "Internal error: mistmatched lengths {{ FIB }}:{{ VRF }}"
-      vars:
-        FIB: "{{ FIB_CMD_LIST | length }}"
-        VRF: "{{ vrfs | length }}"
+        - name: "ASSERT >> Ensure FIB_CMD_LIST and vrfs are same length"
+          assert:
+            that: "FIB == VRF"
+            msg: "Internal error: mistmatched lengths {{ FIB }}:{{ VRF }}"
+          vars:
+            FIB: "{{ FIB_CMD_LIST | length }}"
+            VRF: "{{ vrfs | length }}"
+      delegate_to: "localhost"
 
     # If there were changes, print them and wait for VPN convergence
-    - meta: flush_handlers
+    - meta: "flush_handlers"
 
     - name: "IOS >> Capture FIB for all VRFs"
       ios_command:
         commands: "{{ FIB_CMD_LIST }}"
-      register: VRF_FIB
+      register: "VRF_FIB"
       tags: "do_ssh"
 
     - name: "ASSERT >> Ensure VRF_FIB is defined"
@@ -68,6 +71,7 @@
           - "VRF_FIB is defined"
           - "VRF_FIB | length > 0"
         msg: "Internal error: VRF_FIB not defined"
+      delegate_to: "localhost"
 
     - name: "INCLUDE >> Perform route and ping checks"
       include_tasks: "tasks/route_ping.yml"
@@ -83,6 +87,7 @@
       listen: "wait"
       debug:
         msg: "{{ CONFIG_OUTPUT.commands | to_nice_json }}"
+      delegate_to: "localhost"
 
     - name: "PAUSE >> Wait for VPN route convergence"
       listen: "wait"

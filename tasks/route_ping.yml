@@ -4,8 +4,9 @@
     that: "route in item.1"
   with_items: "{{ item.0.check.routes }}"
   loop_control:
-    loop_var: route
+    loop_var: "route"
     label: "does VRF {{ item.0.name }} have route {{ route }}?"
+  delegate_to: "localhost"
 
 - name: "IOS >> Ensure ping checks succeed"
   ios_ping:
@@ -14,6 +15,6 @@
   with_items: "{{ item.0.check.pings }}"
   tags: "do_ssh"
   loop_control:
-    loop_var: ping
+    loop_var: "ping"
     label: "can VRF {{ item.0.name }} ping {{ ping }}?"
 ...
